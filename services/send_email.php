@@ -1,12 +1,20 @@
 <?php
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept");
+header('Access-Control-Allow-Methods: POST, GET, PUT, OPTIONS');
+
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-require 'vendor/autoload.php';
+require '../vendor/autoload.php';
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $email = $_POST["email"];
-    $resetToken = $_POST["reset_token"];
+    $json = file_get_contents('php://input');
+    $json_convertido = json_decode($json, true);
+
+    $email = $json_convertido['email'];
+    $resetToken = $json_convertido['reset_token'];
+
 
     $mail = new PHPMailer(true);
     try {
