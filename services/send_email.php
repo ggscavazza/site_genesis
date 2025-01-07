@@ -3,33 +3,34 @@ header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept");
 header('Access-Control-Allow-Methods: POST, GET, PUT, OPTIONS');
 
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
-
-require '../vendor/autoload.php';
+require("../PHPMailer-master/src/PHPMailer.php");
+require("../PHPMailer-master/src/SMTP.php");
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $json = file_get_contents('php://input');
     $json_convertido = json_decode($json, true);
 
-    $email = $json_convertido['email'];
+    $destino = $json_convertido['email'];
     $resetToken = $json_convertido['reset_token'];
+    $fromName = $json_convertido['from_name'];
+    $subject_email = $json_convertido['subject_email'];
+    $texto_email = $json_convertido['texto_email'];
 
-
-    $mail = new PHPMailer(true);
+    $mail = new PHPMailer\PHPMailer\PHPMailer();
     try {
+        $mail->CharSet = 'UTF-8';
         $mail->isSMTP();
-        $mail->Host = 'h64.servidorhh.com';
         $mail->SMTPAuth = true;
+        $mail->SMTPSecure = 'ssl';
+        $mail->Host = 'mail.genesisdevstudio.com';
+        $mail->Port = 465;
+        $mail->IsHTML(true);
         $mail->Username = 'no-reply@genesisdevstudio.com';
         $mail->Password = 'Gene@2025@sis';
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-        $mail->Port = 587;
-
-        $mail->setFrom('no-reply@genesisdevstudio.com', 'APP Meu Barbeiro');
-        $mail->addAddress($email);
-        $mail->Subject = 'Redefinição de Senha';
-        $mail->Body = "Seu código de recuperação é: $resetToken.\n\nEle expira em 10 minutos.\nCaso não tenha solicitado a recuperação de senha, ignore este e-mail.";
+        $mail->setFrom('no-reply@genesisdevstudio.com', $fromName);
+        $mail->Subject = $subject_email;
+        $mail->Body = $texto_email;
+        $mail->addAddress($destino);
 
         $mail->send();
         echo json_encode(["status" => "success", "message" => "E-mail enviado com sucesso!"]);
